@@ -11,7 +11,7 @@ USB/BLE HID keyboard and mouse for **M5 Cardputer** and **Cardputer ADV**.
 - Settings saved in flash (USB/BT, mode, speed, rotation)
 - Full keyboard mapping including Fn layer (F-keys, arrows, special keys)
 - Cardputer ADV: arrow keys on keycaps (`;` `,` `.` `/`) or via Fn layer
-- BLE bonded reconnect fix (no need to forget/re-pair after reboot)
+- Display sleep after 45 s idle; battery level in header
 - Reboot: **Ctrl + Fn + Esc**
 
 ## Controls
@@ -51,7 +51,7 @@ Useful when holding Cardputer sideways: right → up, left → down, up → left
 pio run -t upload
 ```
 
-Or flash `MouseKeyboard.bin` with esptool / web flasher.
+Or flash `MouseKeyboard-v1.2.bin` from [Releases](https://github.com/immensaccessum/Bluetooth-Keyboard-Mouse-Emulator/releases).
 
 ## Version
 

@@ -126,4 +126,5 @@ void loop() {
 
     displayUpdatePowerSave(appSettings.usbMode, appSettings.mouseMode, bluetoothStatus,
                            appSettings.mouseSpeed, appSettings.mouseRotation);
+    displayUpdateBattery(false);
 }

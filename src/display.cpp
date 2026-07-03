@@ -2,14 +2,70 @@
 
 namespace {
 constexpr uint32_t kDisplayIdleMs = 45000;
+constexpr uint32_t kBatteryUpdateMs = 30000;
 
 uint8_t displayBrightness = 128;
 unsigned long displayLastActivityMs = 0;
+unsigned long lastBatteryReadMs = 0;
 bool displayIsOn = true;
+int8_t lastBatteryLevel = -100;
+
+uint16_t batteryColor(int8_t level) {
+    if (level < 0) {
+        return TFT_DARKGREY;
+    }
+    if (level <= 15) {
+        return TFT_RED;
+    }
+    if (level <= 30) {
+        return TFT_YELLOW;
+    }
+    return TFT_GREEN;
+}
+
+int8_t readBatteryLevel() {
+    const int32_t level = M5Cardputer.Power.getBatteryLevel();
+    if (level < 0 || level > 100) {
+        return -1;
+    }
+    return static_cast<int8_t>(level);
+}
 }  // namespace
 
 void displayMarkActivity() {
     displayLastActivityMs = millis();
+}
+
+void displayBatteryIndicator() {
+    const int8_t level = readBatteryLevel();
+    lastBatteryLevel = level;
+    lastBatteryReadMs = millis();
+
+    constexpr int x = 200;
+    constexpr int y = 11;
+    M5Cardputer.Display.fillRect(x, y, 40, 18, TFT_LIGHTGREY);
+    M5Cardputer.Display.setTextSize(1);
+    M5Cardputer.Display.setTextColor(batteryColor(level));
+    M5Cardputer.Display.setCursor(x + 4, y + 4);
+    if (level < 0) {
+        M5Cardputer.Display.print("--%");
+    } else {
+        M5Cardputer.Display.printf("%3d%%", level);
+    }
+}
+
+void displayUpdateBattery(bool force) {
+    if (!displayIsOn) {
+        return;
+    }
+
+    const uint32_t now = millis();
+    const int8_t level = readBatteryLevel();
+    if (!force && level == lastBatteryLevel && now - lastBatteryReadMs < kBatteryUpdateMs) {
+        return;
+    }
+
+    displayBatteryIndicator();
 }
 
 void drawDeviceRect(bool mouseMode) {
@@ -146,6 +202,8 @@ void displayMainScreen(bool usbMode, bool mouseMode, bool bluetoothStatus, uint8
     M5Cardputer.Display.print(",.;/ or Fn move");
     M5Cardputer.Display.setCursor(6, 116);
     M5Cardputer.Display.print("Fn+-/= 9/0 spd");
+
+    displayBatteryIndicator();
 }
 
 void displaySelectionScreen(bool usbMode) {
@@ -197,6 +255,8 @@ void displayUpdatePowerSave(bool usbMode, bool mouseMode, bool bluetoothStatus, 
             M5Cardputer.Display.setBrightness(displayBrightness);
             displayIsOn = true;
             displayMainScreen(usbMode, mouseMode, bluetoothStatus, mouseSpeed, mouseRotation);
+        } else {
+            displayUpdateBattery(true);
         }
         displayLastActivityMs = millis();
         return;

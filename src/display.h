@@ -13,6 +13,8 @@ void displayRebootMessage();
 void modeIndicator(bool usbMode, bool bluetoothStatus);
 void drawDeviceRect(bool mouseMode);
 void displayMarkActivity();
+void displayBatteryIndicator();
+void displayUpdateBattery(bool force = false);
 void displayUpdatePowerSave(bool usbMode, bool mouseMode, bool bluetoothStatus, uint8_t mouseSpeed,
                             uint8_t mouseRotation);
 
