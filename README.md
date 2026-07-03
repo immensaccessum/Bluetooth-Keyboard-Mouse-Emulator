@@ -6,21 +6,44 @@ USB/BLE HID keyboard and mouse for **M5 Cardputer** and **Cardputer ADV**.
 
 - USB or Bluetooth HID mode
 - Mouse and keyboard mode (toggle with **G0**)
-- Adjustable mouse speed (**Fn+F11** slower, **Fn+F12** faster)
-- Settings saved in flash (USB/BT choice, mode, speed)
+- Adjustable mouse speed (**Fn + `-`** slower, **Fn + `=`** faster)
+- Cursor axis rotation: 0° / 90° / 180° / 270° (**Fn + `9`** / **Fn + `0`**)
+- Settings saved in flash (USB/BT, mode, speed, rotation)
 - Full keyboard mapping including Fn layer (F-keys, arrows, special keys)
-- Reboot to launcher/menu: **Ctrl+Fn+Esc**
+- Cardputer ADV: dedicated arrow keys on keycaps (no Fn needed for mouse)
+- BLE bonded reconnect fix (no need to forget/re-pair after reboot)
+- Reboot: **Ctrl + Fn + Esc**
 
 ## Controls
 
 | Action | Input |
 |--------|-------|
-| USB / Bluetooth at boot | `;` or `.` to switch, **Enter** to confirm |
+| USB / Bluetooth at boot | `;` or `.` to switch, **Enter** to save |
 | Mouse / Keyboard | **G0** (side button) |
-| Mouse move | `,` `.` `;` `/` or arrow keys (Fn layer) |
+| Mouse move | `,` `.` `;` `/` or arrow keys (on ADV: ← ↓ → and ↑ near `L`) |
 | Mouse click | **Enter** left, `\` right |
-| Mouse speed | **Fn+F11** / **Fn+F12** |
-| Back to launcher | **Ctrl+Fn+Esc** (then **Enter** on boot screen) |
+| Mouse speed | **Fn + `-`** / **Fn + `=`** |
+| Cursor rotation | **Fn + `9`** / **Fn + `0`** (shown as `Rot:0` … `Rot:270`) |
+| Reboot | **Ctrl + Fn + Esc** |
+
+### Fn layer (no physical F-keys on Cardputer)
+
+There are no separate **F1–F12** keys. They are on the Fn layer:
+
+| Fn + key | Result |
+|----------|--------|
+| `1` … `0` | F1 … F10 |
+| `-` | F11 (speed down in mouse mode) |
+| `=` | F12 (speed up in mouse mode) |
+| `9` | F9 (rotation −90° in mouse mode) |
+| `0` | F10 (rotation +90° in mouse mode) |
+| `;` `,` `.` `/` | Arrow keys (on classic Cardputer; ADV has dedicated arrows) |
+
+**Fn** is the key left of **Aa** (3rd row, 1st column). On ADV it may be unlabeled.
+
+### Rotation 90°
+
+Useful when holding Cardputer sideways: right → up, left → down, up → left, down → right.
 
 ## Build & flash
 
@@ -28,8 +51,8 @@ USB/BLE HID keyboard and mouse for **M5 Cardputer** and **Cardputer ADV**.
 pio run -t upload
 ```
 
-Or flash `MouseKeyboard.bin` from releases with esptool / web flasher.
+Or flash `MouseKeyboard.bin` with esptool / web flasher.
 
 ## Version
 
-1.2 — settings, mouse speed, ADV keyboard mapping, launcher reboot shortcut
+**1.2** — ADV keyboard, NVS settings, mouse speed & rotation, BLE reconnect fix, compact UI for 135px display.
