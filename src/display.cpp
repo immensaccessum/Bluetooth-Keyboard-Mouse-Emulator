@@ -1,5 +1,17 @@
 #include "display.h"
 
+namespace {
+constexpr uint32_t kDisplayIdleMs = 45000;
+
+uint8_t displayBrightness = 128;
+unsigned long displayLastActivityMs = 0;
+bool displayIsOn = true;
+}  // namespace
+
+void displayMarkActivity() {
+    displayLastActivityMs = millis();
+}
+
 void drawDeviceRect(bool mouseMode) {
     if (mouseMode) {
         M5Cardputer.Display.drawRoundRect(10, 70, M5Cardputer.Display.width() / 2 - 15,
@@ -83,6 +95,14 @@ void setupDisplay() {
     M5Cardputer.Display.setRotation(1);
     M5Cardputer.Display.fillScreen(TFT_BLACK);
     M5Cardputer.Display.setTextColor(TFT_BLACK);
+
+    displayBrightness = M5Cardputer.Display.getBrightness();
+    if (displayBrightness == 0) {
+        displayBrightness = 128;
+    }
+    M5Cardputer.Display.setBrightness(displayBrightness);
+    displayLastActivityMs = millis();
+    displayIsOn = true;
 }
 
 void displayWelcomeScreen() {
@@ -166,4 +186,28 @@ void displaySelectionScreen(bool usbMode) {
     M5Cardputer.Display.print("; . switch");
     M5Cardputer.Display.setCursor(68, 106);
     M5Cardputer.Display.print("Enter save");
+}
+
+void displayUpdatePowerSave(bool usbMode, bool mouseMode, bool bluetoothStatus, uint8_t mouseSpeed,
+                            uint8_t mouseRotation) {
+    const bool userActive = M5Cardputer.Keyboard.isPressed() || M5Cardputer.BtnA.isPressed();
+
+    if (userActive) {
+        if (!displayIsOn) {
+            M5Cardputer.Display.setBrightness(displayBrightness);
+            displayIsOn = true;
+            displayMainScreen(usbMode, mouseMode, bluetoothStatus, mouseSpeed, mouseRotation);
+        }
+        displayLastActivityMs = millis();
+        return;
+    }
+
+    if (!displayIsOn) {
+        return;
+    }
+
+    if (millis() - displayLastActivityMs >= kDisplayIdleMs) {
+        M5Cardputer.Display.setBrightness(0);
+        displayIsOn = false;
+    }
 }

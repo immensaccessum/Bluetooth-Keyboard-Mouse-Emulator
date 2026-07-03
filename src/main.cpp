@@ -1,5 +1,4 @@
 #include <M5Cardputer.h>
-#include <USB.h>
 #include <esp_system.h>
 
 #include "bluetooth.h"
@@ -38,6 +37,7 @@ void selectMode() {
             }
         }
 
+        displayMarkActivity();
         delay(10);
     }
 }
@@ -59,13 +59,14 @@ void setup() {
     selectMode();
 
     if (appSettings.usbMode) {
-        USB.begin();
+        initUsbHid();
     } else {
         initBluetooth();
     }
 
     displayMainScreen(appSettings.usbMode, appSettings.mouseMode, getBluetoothStatus(),
                       appSettings.mouseSpeed, appSettings.mouseRotation);
+    displayMarkActivity();
 }
 
 void loop() {
@@ -81,7 +82,13 @@ void loop() {
         lastBluetoothStatus = bluetoothStatus;
     }
 
-    if (M5Cardputer.Keyboard.isChange() && M5Cardputer.Keyboard.isPressed()) {
+    if (appSettings.usbMode) {
+        handleUsbMode(appSettings.mouseMode, appSettings.mouseSpeed, appSettings.mouseRotation);
+    } else {
+        handleBluetoothMode(appSettings.mouseMode, appSettings.mouseSpeed, appSettings.mouseRotation);
+    }
+
+    if (M5Cardputer.Keyboard.isPressed()) {
         Keyboard_Class::KeysState status = M5Cardputer.Keyboard.keysState();
 
         if (shouldRebootToLauncher(status)) {
@@ -104,7 +111,7 @@ void loop() {
         lastF12 = status.f12;
         lastF9 = status.f9;
         lastF10 = status.f10;
-    } else if (!M5Cardputer.Keyboard.isPressed()) {
+    } else {
         lastF11 = false;
         lastF12 = false;
         lastF9 = false;
@@ -118,9 +125,6 @@ void loop() {
         delay(200);
     }
 
-    if (appSettings.usbMode) {
-        handleUsbMode(appSettings.mouseMode, appSettings.mouseSpeed, appSettings.mouseRotation);
-    } else {
-        handleBluetoothMode(appSettings.mouseMode, appSettings.mouseSpeed, appSettings.mouseRotation);
-    }
+    displayUpdatePowerSave(appSettings.usbMode, appSettings.mouseMode, bluetoothStatus,
+                           appSettings.mouseSpeed, appSettings.mouseRotation);
 }

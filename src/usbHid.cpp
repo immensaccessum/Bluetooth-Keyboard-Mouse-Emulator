@@ -1,9 +1,16 @@
 #include "usbHid.h"
 
 #include "hid_keys.h"
+#include <USB.h>
 
 USBHIDMouse mouse;
 USBHIDKeyboard keyboard;
+
+void initUsbHid() {
+    mouse.begin();
+    keyboard.begin();
+    USB.begin();
+}
 
 void handleUsbMode(bool mouseMode, uint8_t mouseSpeed, uint8_t mouseRotation) {
     if (mouseMode) {
@@ -15,8 +22,6 @@ void handleUsbMode(bool mouseMode, uint8_t mouseSpeed, uint8_t mouseRotation) {
 }
 
 void usbMouse(uint8_t mouseSpeed, uint8_t mouseRotation) {
-    mouse.begin();
-
     if (!M5Cardputer.Keyboard.isPressed()) {
         mouse.release(MOUSE_BUTTON_LEFT);
         mouse.release(MOUSE_BUTTON_RIGHT);
@@ -43,13 +48,12 @@ void usbMouse(uint8_t mouseSpeed, uint8_t mouseRotation) {
 }
 
 void usbKeyboard() {
-    static bool inited = false;
-    if (!inited) {
-        keyboard.begin();
-        inited = true;
+    if (!M5Cardputer.Keyboard.isChange()) {
+        return;
     }
 
-    if (!M5Cardputer.Keyboard.isChange()) {
+    if (!M5Cardputer.Keyboard.isPressed()) {
+        keyboard.releaseAll();
         return;
     }
 
@@ -59,19 +63,6 @@ void usbKeyboard() {
     fillKeyboardModifiers(report.modifiers, status);
     fillKeyboardKeycodes(report.keys, status);
 
-    if (report.modifiers == 0) {
-        bool empty = true;
-        for (uint8_t key : report.keys) {
-            if (key != 0) {
-                empty = false;
-                break;
-            }
-        }
-        if (empty) {
-            keyboard.releaseAll();
-            return;
-        }
-    }
-
     keyboard.sendReport(&report);
+    keyboard.releaseAll();
 }

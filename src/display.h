@@ -12,5 +12,8 @@ void displayMouseStatus(uint8_t mouseSpeed, uint8_t mouseRotation);
 void displayRebootMessage();
 void modeIndicator(bool usbMode, bool bluetoothStatus);
 void drawDeviceRect(bool mouseMode);
+void displayMarkActivity();
+void displayUpdatePowerSave(bool usbMode, bool mouseMode, bool bluetoothStatus, uint8_t mouseSpeed,
+                            uint8_t mouseRotation);
 
 #endif

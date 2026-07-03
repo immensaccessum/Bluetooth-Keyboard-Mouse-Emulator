@@ -23,19 +23,6 @@ void appendKey(uint8_t keycode[6], uint8_t &count, uint8_t code) {
 
 void fillKeyboardModifiers(uint8_t &modifier, const Keyboard_Class::KeysState &status) {
     modifier = status.modifiers;
-    if (modifier != 0) {
-        return;
-    }
-
-    if (status.ctrl) {
-        modifier |= 0x01;
-    }
-    if (status.shift) {
-        modifier |= 0x02;
-    }
-    if (status.alt) {
-        modifier |= 0x04;
-    }
     if (status.opt) {
         modifier |= 0x08;
     }
