@@ -73,19 +73,15 @@ void loop() {
     M5Cardputer.update();
 
     if (!appSettings.usbMode) {
-        monitorBluetoothConnection();
+        handleBluetoothMode(appSettings.mouseMode, appSettings.mouseSpeed, appSettings.mouseRotation);
+    } else {
+        handleUsbMode(appSettings.mouseMode, appSettings.mouseSpeed, appSettings.mouseRotation);
     }
 
-    const bool bluetoothStatus = getBluetoothStatus();
+    const bool bluetoothStatus = appSettings.usbMode ? false : getBluetoothStatus();
     if (lastBluetoothStatus != bluetoothStatus) {
         modeIndicator(appSettings.usbMode, bluetoothStatus);
         lastBluetoothStatus = bluetoothStatus;
-    }
-
-    if (appSettings.usbMode) {
-        handleUsbMode(appSettings.mouseMode, appSettings.mouseSpeed, appSettings.mouseRotation);
-    } else {
-        handleBluetoothMode(appSettings.mouseMode, appSettings.mouseSpeed, appSettings.mouseRotation);
     }
 
     if (M5Cardputer.Keyboard.isPressed()) {
@@ -121,6 +117,9 @@ void loop() {
     if (M5Cardputer.BtnA.isPressed()) {
         appSettings.mouseMode = !appSettings.mouseMode;
         settingsSave(appSettings);
+        if (!appSettings.usbMode) {
+            resetBluetoothInputState();
+        }
         drawDeviceRect(appSettings.mouseMode);
         delay(200);
     }

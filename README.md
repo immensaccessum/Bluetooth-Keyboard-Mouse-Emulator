@@ -10,7 +10,7 @@ USB/BLE HID keyboard and mouse for **M5 Cardputer** and **Cardputer ADV**.
 - Cursor axis rotation: 0° / 90° / 180° / 270° (**Fn + `9`** / **Fn + `0`**)
 - Settings saved in flash (USB/BT, mode, speed, rotation)
 - Full keyboard mapping including Fn layer (F-keys, arrows, special keys)
-- Cardputer ADV: dedicated arrow keys on keycaps (no Fn needed for mouse)
+- Cardputer ADV: arrow keys on keycaps (`;` `,` `.` `/`) or via Fn layer
 - BLE bonded reconnect fix (no need to forget/re-pair after reboot)
 - Reboot: **Ctrl + Fn + Esc**
 
@@ -20,7 +20,7 @@ USB/BLE HID keyboard and mouse for **M5 Cardputer** and **Cardputer ADV**.
 |--------|-------|
 | USB / Bluetooth at boot | `;` or `.` to switch, **Enter** to save |
 | Mouse / Keyboard | **G0** (side button) |
-| Mouse move | `,` `.` `;` `/` or arrow keys (on ADV: ← ↓ → and ↑ near `L`) |
+| Mouse move | `,` `.` `;` `/` or **Fn +** same keys (arrows) |
 | Mouse click | **Enter** left, `\` right |
 | Mouse speed | **Fn + `-`** / **Fn + `=`** |
 | Cursor rotation | **Fn + `9`** / **Fn + `0`** (shown as `Rot:0` … `Rot:270`) |

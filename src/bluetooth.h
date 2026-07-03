@@ -85,6 +85,7 @@ void monitorBluetoothConnection();
 void bluetoothMouse(uint8_t mouseSpeed, uint8_t mouseRotation);
 void bluetoothKeyboard();
 void sendEmptyReports();
+void resetBluetoothInputState();
 void handleBluetoothMode(bool mouseMode, uint8_t mouseSpeed, uint8_t mouseRotation);
 
 class MyBLEServerCallbacks : public BLEServerCallbacks {

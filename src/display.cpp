@@ -143,9 +143,9 @@ void displayMainScreen(bool usbMode, bool mouseMode, bool bluetoothStatus, uint8
     M5Cardputer.Display.setTextColor(TFT_DARKGREY);
     M5Cardputer.Display.setTextSize(1);
     M5Cardputer.Display.setCursor(6, 106);
-    M5Cardputer.Display.print("Fn+-/= spd");
+    M5Cardputer.Display.print(",.;/ or Fn move");
     M5Cardputer.Display.setCursor(6, 116);
-    M5Cardputer.Display.print("Fn+9/0 rot");
+    M5Cardputer.Display.print("Fn+-/= 9/0 spd");
 }
 
 void displaySelectionScreen(bool usbMode) {

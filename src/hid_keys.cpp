@@ -77,6 +77,7 @@ MouseDelta readMouseInput(uint8_t speed, uint8_t rotation) {
         delta.buttons |= 0x02;
     }
 
+    // Mouse: direct keys or Fn-layer arrows (; , . / and status.up/down/left/right)
     if (M5Cardputer.Keyboard.isKeyPressed(';') || status.up) {
         delta.y -= step;
     } else if (M5Cardputer.Keyboard.isKeyPressed('.') || status.down) {
