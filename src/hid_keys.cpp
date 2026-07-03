@@ -55,7 +55,30 @@ void fillKeyboardKeycodes(uint8_t keycode[6], const Keyboard_Class::KeysState &s
     }
 }
 
-MouseDelta readMouseInput(uint8_t speed) {
+void applyMouseRotation(int16_t &dx, int16_t &dy, uint8_t rotation) {
+    switch (rotation & 0x03) {
+        case 1: {
+            const int16_t tx = dx;
+            dx = dy;
+            dy = -tx;
+            break;
+        }
+        case 2:
+            dx = -dx;
+            dy = -dy;
+            break;
+        case 3: {
+            const int16_t tx = dx;
+            dx = -dy;
+            dy = tx;
+            break;
+        }
+        default:
+            break;
+    }
+}
+
+MouseDelta readMouseInput(uint8_t speed, uint8_t rotation) {
     MouseDelta delta;
     Keyboard_Class::KeysState status = M5Cardputer.Keyboard.keysState();
     const int16_t step = speed;
@@ -79,6 +102,7 @@ MouseDelta readMouseInput(uint8_t speed) {
         delta.x -= step;
     }
 
+    applyMouseRotation(delta.x, delta.y, rotation);
     return delta;
 }
 
@@ -95,6 +119,21 @@ bool adjustMouseSpeed(uint8_t &speed, const Keyboard_Class::KeysState &status, b
     }
     if (status.f12 && !wasF12 && speed < 10) {
         ++speed;
+        changed = true;
+    }
+
+    return changed;
+}
+
+bool adjustMouseRotation(uint8_t &rotation, const Keyboard_Class::KeysState &status, bool wasF9, bool wasF10) {
+    bool changed = false;
+
+    if (status.f9 && !wasF9) {
+        rotation = (rotation + 3) & 0x03;
+        changed = true;
+    }
+    if (status.f10 && !wasF10) {
+        rotation = (rotation + 1) & 0x03;
         changed = true;
     }
 

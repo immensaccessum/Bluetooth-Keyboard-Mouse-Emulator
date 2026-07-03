@@ -12,7 +12,6 @@
 extern BLEHIDDevice *hid;
 extern BLECharacteristic *mouseInput;
 extern BLECharacteristic *keyboardInput;
-extern bool isConnected;
 
 const uint8_t HID_REPORT_MAP[] = {
     0x05, 0x01,
@@ -81,11 +80,12 @@ const uint8_t HID_REPORT_MAP[] = {
 void initBluetooth();
 void deinitBluetooth();
 bool getBluetoothStatus();
+void monitorBluetoothConnection();
 
-void bluetoothMouse(uint8_t mouseSpeed);
+void bluetoothMouse(uint8_t mouseSpeed, uint8_t mouseRotation);
 void bluetoothKeyboard();
 void sendEmptyReports();
-void handleBluetoothMode(bool mouseMode, uint8_t mouseSpeed);
+void handleBluetoothMode(bool mouseMode, uint8_t mouseSpeed, uint8_t mouseRotation);
 
 class MyBLEServerCallbacks : public BLEServerCallbacks {
 public:

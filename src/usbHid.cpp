@@ -5,16 +5,16 @@
 USBHIDMouse mouse;
 USBHIDKeyboard keyboard;
 
-void handleUsbMode(bool mouseMode, uint8_t mouseSpeed) {
+void handleUsbMode(bool mouseMode, uint8_t mouseSpeed, uint8_t mouseRotation) {
     if (mouseMode) {
-        usbMouse(mouseSpeed);
+        usbMouse(mouseSpeed, mouseRotation);
     } else {
         usbKeyboard();
     }
     delay(5);
 }
 
-void usbMouse(uint8_t mouseSpeed) {
+void usbMouse(uint8_t mouseSpeed, uint8_t mouseRotation) {
     mouse.begin();
 
     if (!M5Cardputer.Keyboard.isPressed()) {
@@ -23,7 +23,7 @@ void usbMouse(uint8_t mouseSpeed) {
         return;
     }
 
-    const MouseDelta delta = readMouseInput(mouseSpeed);
+    const MouseDelta delta = readMouseInput(mouseSpeed, mouseRotation);
 
     if (delta.buttons & 0x01) {
         mouse.press(MOUSE_BUTTON_LEFT);

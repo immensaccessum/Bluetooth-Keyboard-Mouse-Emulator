@@ -57,12 +57,14 @@ void modeIndicator(bool usbMode, bool bluetoothStatus) {
     }
 }
 
-void displayMouseSpeed(uint8_t mouseSpeed) {
-    M5Cardputer.Display.fillRect(178, 108, 52, 10, TFT_BLACK);
+void displayMouseStatus(uint8_t mouseSpeed, uint8_t mouseRotation) {
+    M5Cardputer.Display.fillRect(150, 98, 88, 20, TFT_BLACK);
     M5Cardputer.Display.setTextColor(TFT_LIGHTGREY);
     M5Cardputer.Display.setTextSize(1);
-    M5Cardputer.Display.setCursor(180, 109);
+    M5Cardputer.Display.setCursor(152, 99);
     M5Cardputer.Display.printf("Spd:%u", mouseSpeed);
+    M5Cardputer.Display.setCursor(152, 109);
+    M5Cardputer.Display.printf("Rot:%u", static_cast<unsigned>(mouseRotation) * 90U);
 }
 
 void displayRebootMessage() {
@@ -97,7 +99,8 @@ void displayWelcomeScreen() {
     delay(1500);
 }
 
-void displayMainScreen(bool usbMode, bool mouseMode, bool bluetoothStatus, uint8_t mouseSpeed) {
+void displayMainScreen(bool usbMode, bool mouseMode, bool bluetoothStatus, uint8_t mouseSpeed,
+                       uint8_t mouseRotation) {
     M5Cardputer.Display.fillScreen(TFT_BLACK);
     M5Cardputer.Display.fillRoundRect(10, 10, M5Cardputer.Display.width() - 20, 20, 5, TFT_LIGHTGREY);
     M5Cardputer.Display.setCursor(19, 13);
@@ -115,14 +118,14 @@ void displayMainScreen(bool usbMode, bool mouseMode, bool bluetoothStatus, uint8
     drawMouseIcon(165, 80);
     drawKeyboardIcon(42, 87);
     modeIndicator(usbMode, bluetoothStatus);
-    displayMouseSpeed(mouseSpeed);
+    displayMouseStatus(mouseSpeed, mouseRotation);
 
     M5Cardputer.Display.setTextColor(TFT_DARKGREY);
     M5Cardputer.Display.setTextSize(1);
     M5Cardputer.Display.setCursor(6, 106);
-    M5Cardputer.Display.print("F11/F12 speed");
+    M5Cardputer.Display.print("Fn+-/= spd");
     M5Cardputer.Display.setCursor(6, 116);
-    M5Cardputer.Display.print("Ctrl+Fn+Esc out");
+    M5Cardputer.Display.print("Fn+9/0 rot");
 }
 
 void displaySelectionScreen(bool usbMode) {

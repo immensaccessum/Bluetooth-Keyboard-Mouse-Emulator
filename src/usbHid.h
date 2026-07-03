@@ -5,8 +5,8 @@
 #include "USBHIDKeyboard.h"
 #include <M5Cardputer.h>
 
-void usbMouse(uint8_t mouseSpeed);
+void usbMouse(uint8_t mouseSpeed, uint8_t mouseRotation);
 void usbKeyboard();
-void handleUsbMode(bool mouseMode, uint8_t mouseSpeed);
+void handleUsbMode(bool mouseMode, uint8_t mouseSpeed, uint8_t mouseRotation);
 
 #endif

@@ -12,6 +12,8 @@ AppSettings appSettings;
 bool lastBluetoothStatus = false;
 bool lastF11 = false;
 bool lastF12 = false;
+bool lastF9 = false;
+bool lastF10 = false;
 
 void selectMode() {
     bool lastMode = !appSettings.usbMode;
@@ -62,11 +64,16 @@ void setup() {
         initBluetooth();
     }
 
-    displayMainScreen(appSettings.usbMode, appSettings.mouseMode, getBluetoothStatus(), appSettings.mouseSpeed);
+    displayMainScreen(appSettings.usbMode, appSettings.mouseMode, getBluetoothStatus(),
+                      appSettings.mouseSpeed, appSettings.mouseRotation);
 }
 
 void loop() {
     M5Cardputer.update();
+
+    if (!appSettings.usbMode) {
+        monitorBluetoothConnection();
+    }
 
     const bool bluetoothStatus = getBluetoothStatus();
     if (lastBluetoothStatus != bluetoothStatus) {
@@ -84,14 +91,24 @@ void loop() {
         if (appSettings.mouseMode &&
             adjustMouseSpeed(appSettings.mouseSpeed, status, lastF11, lastF12)) {
             settingsSave(appSettings);
-            displayMouseSpeed(appSettings.mouseSpeed);
+            displayMouseStatus(appSettings.mouseSpeed, appSettings.mouseRotation);
+        }
+
+        if (appSettings.mouseMode &&
+            adjustMouseRotation(appSettings.mouseRotation, status, lastF9, lastF10)) {
+            settingsSave(appSettings);
+            displayMouseStatus(appSettings.mouseSpeed, appSettings.mouseRotation);
         }
 
         lastF11 = status.f11;
         lastF12 = status.f12;
+        lastF9 = status.f9;
+        lastF10 = status.f10;
     } else if (!M5Cardputer.Keyboard.isPressed()) {
         lastF11 = false;
         lastF12 = false;
+        lastF9 = false;
+        lastF10 = false;
     }
 
     if (M5Cardputer.BtnA.isPressed()) {
@@ -102,8 +119,8 @@ void loop() {
     }
 
     if (appSettings.usbMode) {
-        handleUsbMode(appSettings.mouseMode, appSettings.mouseSpeed);
+        handleUsbMode(appSettings.mouseMode, appSettings.mouseSpeed, appSettings.mouseRotation);
     } else {
-        handleBluetoothMode(appSettings.mouseMode, appSettings.mouseSpeed);
+        handleBluetoothMode(appSettings.mouseMode, appSettings.mouseSpeed, appSettings.mouseRotation);
     }
 }

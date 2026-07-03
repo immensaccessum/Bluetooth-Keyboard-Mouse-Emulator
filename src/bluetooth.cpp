@@ -1,30 +1,105 @@
-
 #include "bluetooth.h"
 
 #include "hid_keys.h"
+#include <BLE2902.h>
+
+namespace {
+constexpr uint32_t kHidReadyTimeoutMs = 2500;
+constexpr uint8_t kMaxStaleDisconnects = 3;
+
+BLEServer *bleServer = nullptr;
+bool bluetoothLinked = false;
+unsigned long linkedAtMs = 0;
+uint8_t staleDisconnectCount = 0;
+
+void enableReportNotifications(BLECharacteristic *characteristic) {
+    if (characteristic == nullptr) {
+        return;
+    }
+
+    auto *cccd =
+        static_cast<BLE2902 *>(characteristic->getDescriptorByUUID(static_cast<uint16_t>(0x2902)));
+    if (cccd != nullptr) {
+        // Pre-enable CCCD so bonded reconnect restores HID notifications on Android.
+        cccd->setNotifications(true);
+    }
+}
+
+bool reportNotificationsEnabled(BLECharacteristic *characteristic) {
+    if (characteristic == nullptr) {
+        return false;
+    }
+
+    auto *cccd =
+        static_cast<BLE2902 *>(characteristic->getDescriptorByUUID(static_cast<uint16_t>(0x2902)));
+    return cccd != nullptr && cccd->getNotifications();
+}
+
+bool isBluetoothHidReady() {
+    return reportNotificationsEnabled(mouseInput) || reportNotificationsEnabled(keyboardInput);
+}
+}  // namespace
 
 BLEHIDDevice *hid;
 BLECharacteristic *mouseInput;
 BLECharacteristic *keyboardInput;
-bool bluetoothIsConnected = false;
 
 void MyBLEServerCallbacks::onConnect(BLEServer *pServer) {
-    bluetoothIsConnected = true;
+    bluetoothLinked = true;
+    linkedAtMs = millis();
 }
 
 void MyBLEServerCallbacks::onDisconnect(BLEServer *pServer, esp_ble_gatts_cb_param_t *param) {
-    bluetoothIsConnected = false;
-
-    pServer->disconnect(param->disconnect.conn_id);
+    (void)param;
+    bluetoothLinked = false;
+    linkedAtMs = 0;
     pServer->startAdvertising();
 }
 
 bool getBluetoothStatus() {
-    return bluetoothIsConnected;
+    return bluetoothLinked && isBluetoothHidReady();
 }
 
-void bluetoothMouse(uint8_t mouseSpeed) {
-    const MouseDelta delta = readMouseInput(mouseSpeed);
+void monitorBluetoothConnection() {
+    if (bleServer == nullptr) {
+        return;
+    }
+
+    if (bleServer->getConnectedCount() == 0) {
+        bluetoothLinked = false;
+        linkedAtMs = 0;
+        return;
+    }
+
+    bluetoothLinked = true;
+
+    if (isBluetoothHidReady()) {
+        linkedAtMs = 0;
+        staleDisconnectCount = 0;
+        return;
+    }
+
+    if (linkedAtMs == 0) {
+        linkedAtMs = millis();
+        return;
+    }
+
+    if (millis() - linkedAtMs < kHidReadyTimeoutMs) {
+        return;
+    }
+
+    if (staleDisconnectCount >= kMaxStaleDisconnects) {
+        return;
+    }
+
+    staleDisconnectCount++;
+    linkedAtMs = 0;
+    bleServer->disconnect(bleServer->getConnId());
+    bleServer->startAdvertising();
+}
+
+void bluetoothMouse(uint8_t mouseSpeed, uint8_t mouseRotation) {
+    const MouseDelta delta = readMouseInput(mouseSpeed, mouseRotation);
     const int8_t x = constrain(delta.x, -127, 127);
     const int8_t y = constrain(delta.y, -127, 127);
     const uint8_t report[4] = {
@@ -73,15 +148,17 @@ void sendEmptyReports() {
     keyboardInput->notify();
 }
 
-void handleBluetoothMode(bool mouseMode, uint8_t mouseSpeed) {
-    if (!bluetoothIsConnected) {
+void handleBluetoothMode(bool mouseMode, uint8_t mouseSpeed, uint8_t mouseRotation) {
+    monitorBluetoothConnection();
+
+    if (!getBluetoothStatus()) {
         delay(7);
         return;
     }
 
     if (M5Cardputer.Keyboard.isPressed()) {
         if (mouseMode) {
-            bluetoothMouse(mouseSpeed);
+            bluetoothMouse(mouseSpeed, mouseRotation);
         } else {
             bluetoothKeyboard();
         }
@@ -94,12 +171,14 @@ void handleBluetoothMode(bool mouseMode, uint8_t mouseSpeed) {
 
 void initBluetooth() {
     BLEDevice::init("M5-Keyboard-Mouse");
-    BLEServer *pServer = BLEDevice::createServer();
-    pServer->setCallbacks(new MyBLEServerCallbacks());
+    bleServer = BLEDevice::createServer();
+    bleServer->setCallbacks(new MyBLEServerCallbacks());
 
-    hid = new BLEHIDDevice(pServer);
+    hid = new BLEHIDDevice(bleServer);
     mouseInput = hid->inputReport(1);
     keyboardInput = hid->inputReport(2);
+    enableReportNotifications(mouseInput);
+    enableReportNotifications(keyboardInput);
 
     hid->manufacturer()->setValue("M5Stack");
     hid->pnp(0x02, 0x1234, 0x5678, 0x0100);
@@ -107,7 +186,7 @@ void initBluetooth() {
     hid->reportMap((uint8_t *)HID_REPORT_MAP, sizeof(HID_REPORT_MAP));
     hid->startServices();
 
-    BLEAdvertising *pAdvertising = pServer->getAdvertising();
+    BLEAdvertising *pAdvertising = bleServer->getAdvertising();
     pAdvertising->setAppearance(HID_MOUSE);
     pAdvertising->addServiceUUID(hid->hidService()->getUUID());
     pAdvertising->start();
