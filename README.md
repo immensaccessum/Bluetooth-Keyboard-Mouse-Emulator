@@ -38,7 +38,6 @@ There are no separate **F1–F12** keys. They are on the Fn layer:
 | `9` | F9 (rotation −90° in mouse mode) |
 | `0` | F10 (rotation +90° in mouse mode) |
 | `;` `,` `.` `/` | Arrow keys (on classic Cardputer; ADV has dedicated arrows) |
-| Backspace | **Delete** (forward delete) |
 
 **Fn** is the key left of **Aa** (3rd row, 1st column). On ADV it may be unlabeled.
 
@@ -49,9 +48,7 @@ Useful when holding Cardputer sideways: right → up, left → down, up → left
 ## Build & flash
 
 ```bash
-git clone https://github.com/immensaccessum/Bluetooth-Keyboard-Mouse-Emulator.git
-cd Bluetooth-Keyboard-Mouse-Emulator
-pio run -t upload --upload-port /dev/ttyACM0
+pio run -t upload
 ```
 
 Or flash `MouseKeyboard-v1.2.bin` from [Releases](https://github.com/immensaccessum/Bluetooth-Keyboard-Mouse-Emulator/releases).
