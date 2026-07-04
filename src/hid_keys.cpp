@@ -3,6 +3,15 @@
 namespace {
 constexpr uint8_t kHidSpace = 0x2C;
 constexpr uint8_t kHidEnter = 0x28;
+constexpr uint8_t kHidBackspace = 0x2A;
+constexpr uint8_t kHidDelete = 0x4C;
+constexpr uint8_t kHidTab = 0x2B;
+constexpr uint8_t kHidEscape = 0x29;
+constexpr uint8_t kHidUp = 0x52;
+constexpr uint8_t kHidDown = 0x51;
+constexpr uint8_t kHidLeft = 0x50;
+constexpr uint8_t kHidRight = 0x4F;
+constexpr uint8_t kHidFn = 0xFF;
 
 bool containsKey(const uint8_t *keys, uint8_t count, uint8_t code) {
     for (uint8_t i = 0; i < count; ++i) {
@@ -19,6 +28,17 @@ void appendKey(uint8_t keycode[6], uint8_t &count, uint8_t code) {
     }
     keycode[count++] = code;
 }
+
+bool isReportableHidKey(uint8_t code) {
+    if (code == 0 || code == kHidFn) {
+        return false;
+    }
+    // Modifier keys belong in the modifier byte, not the key array.
+    if (code >= 0x80 && code <= 0x87) {
+        return false;
+    }
+    return true;
+}
 }  // namespace
 
 void fillKeyboardModifiers(uint8_t &modifier, const Keyboard_Class::KeysState &status) {
@@ -31,9 +51,35 @@ void fillKeyboardModifiers(uint8_t &modifier, const Keyboard_Class::KeysState &s
 void fillKeyboardKeycodes(uint8_t keycode[6], const Keyboard_Class::KeysState &status) {
     uint8_t count = 0;
     for (auto key : status.hid_keys) {
-        appendKey(keycode, count, key);
+        if (isReportableHidKey(key)) {
+            appendKey(keycode, count, key);
+        }
     }
 
+    if (status.tab) {
+        appendKey(keycode, count, kHidTab);
+    }
+    if (status.backspace) {
+        appendKey(keycode, count, kHidBackspace);
+    }
+    if (status.del) {
+        appendKey(keycode, count, kHidDelete);
+    }
+    if (status.esc) {
+        appendKey(keycode, count, kHidEscape);
+    }
+    if (status.up) {
+        appendKey(keycode, count, kHidUp);
+    }
+    if (status.down) {
+        appendKey(keycode, count, kHidDown);
+    }
+    if (status.left) {
+        appendKey(keycode, count, kHidLeft);
+    }
+    if (status.right) {
+        appendKey(keycode, count, kHidRight);
+    }
     if (status.space) {
         appendKey(keycode, count, kHidSpace);
     }
